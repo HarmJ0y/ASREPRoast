@@ -708,7 +708,7 @@ http://www.exumbraops.com/blog/2016/6/1/kerberos-party-tricks-weaponizing-kerber
     $TargetDCIP = $Null
 
     if ($PSBoundParameters['Server']) {
-        $TargetDCIP = [System.Net.Dns]::GetHostAddresses($Server) | Select-Object -ExpandProperty IPAddressToString
+        $TargetDCIP = [System.Net.Dns]::GetHostAddresses($Server) | Where-Object {$_.AddressFamily -eq 'InterNetwork'} | Select-Object -ExpandProperty IPAddressToString
         Write-Verbose "[Get-ASREPHash] DC server IP '$TargetDCIP' resolved from passed -Server parameter"
     }
 
@@ -716,7 +716,10 @@ http://www.exumbraops.com/blog/2016/6/1/kerberos-party-tricks-weaponizing-kerber
         if (-not $TargetDCIP) {
             $TargetDomain = Get-Domain -Domain $Domain
             $TargetDomainName = $TargetDomain.Name
-            $TargetDCIP = $TargetDomain.DomainControllers | Select-Object -First 1 | Select-Object -ExpandProperty IPAddress
+
+            $TargetDC = $TargetDomain.DomainControllers | Select-Object -First 1 | Select-Object -ExpandProperty name
+            $TargetDCIP = [System.Net.Dns]::GetHostAddresses($TargetDC) | Where-Object {$_.AddressFamily -eq 'InterNetwork'} | Select-Object -ExpandProperty IPAddressToString
+
             Write-Verbose "[Get-ASREPHash] DC server IP '$TargetDCIP' resolved from passed -Domain parameter"
         }
         else {
@@ -729,7 +732,9 @@ http://www.exumbraops.com/blog/2016/6/1/kerberos-party-tricks-weaponizing-kerber
             $TargetDomain = Get-Domain
             $TargetDomainName = $TargetDomain.Name
             if (-not $TargetDCIP) {
-                $TargetDCIP = $TargetDomain.DomainControllers | Select-Object -First 1 | Select-Object -ExpandProperty IPAddress
+                $TargetDC = $TargetDomain.DomainControllers | Select-Object -First 1 | Select-Object -ExpandProperty name
+                $TargetDCIP = [System.Net.Dns]::GetHostAddresses($TargetDC) | Where-Object {$_.AddressFamily -eq 'InterNetwork'} | Select-Object -ExpandProperty IPAddressToString
+
                 Write-Verbose "[Get-ASREPHash] DC server IP '$TargetDCIP' resolved from current domain"
             }
         }
@@ -870,11 +875,12 @@ requests
 
         $TargetDomainName = $TargetDomain.Name
         if ($PSBoundParameters['Server']) {
-            $TargetDCIP = [System.Net.Dns]::GetHostAddresses($Server) | Select-Object -ExpandProperty IPAddressToString
+            $TargetDCIP = [System.Net.Dns]::GetHostAddresses($Server) | Where-Object {$_.AddressFamily -eq 'InterNetwork'} | Select-Object -ExpandProperty IPAddressToString
             Write-Verbose "[Invoke-ASREPRoast] DC server IP '$TargetDCIP' resolved from passed -Server parameter"
         }
         else {
-            $TargetDCIP = $TargetDomain.DomainControllers | Select-Object -First 1 | Select-Object -ExpandProperty IPAddress
+            $TargetDC = $TargetDomain.DomainControllers | Select-Object -First 1 | Select-Object -ExpandProperty name
+            $TargetDCIP = [System.Net.Dns]::GetHostAddresses($TargetDC) | Where-Object {$_.AddressFamily -eq 'InterNetwork'} | Select-Object -ExpandProperty IPAddressToString
             Write-Verbose "[Invoke-ASREPRoast] DC server IP '$TargetDCIP' resolved from passed -Domain parameter"
         }
 
