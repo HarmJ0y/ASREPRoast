@@ -1,3 +1,5 @@
+# This project has now been deprecated. Its functionality has been incorporated into [Rubeus](https://github.com/GhostPack/Rubeus) via the "asreproast" action, which utilizes a more minimal ASN.1 parsing library.
+
 # ASREPRoast
 
 Project that retrieves crackable hashes from KRB5 AS-REP responses for users without kerberoast preauthentication enabled.
